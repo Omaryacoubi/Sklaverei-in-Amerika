@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sklaverei in Amerika – One-Page mit funktionierendem Kapitel-Wechsel</title>
+  <style>
+    :root {
+      --bg-light:    #F5F1E8;
+      --bg-panel:    #FFFFFF;
+      --bg-header:   #B89E7E;
+      --bg-cta:      #A67B5B;
+      --bg-toggle:   #EDE3D7;
+      --accent:      #4A3F35;
+      --text-light:  #FFF;
+      --transition:  0.3s ease;
+    }
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg-light);
+      color: var(--accent);
+      scroll-behavior: smooth;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* HEADER */
+    header {
+      background: var(--bg-header);
+      color: var(--text-light);
+      text-align: center;
+      padding: 2rem 1rem;
+      position: relative;
+    }
+    header h1 { font-size: 2.75rem; margin-bottom: .5rem; }
+    header p  { font-size: 1.15rem; max-width: 700px; margin: 0 auto; line-height: 1.5; }
+    .menu-btn {
+      position: absolute; top: 1rem; right: 1rem;
+      font-size: 1.75rem; color: var(--text-light);
+      padding: .25rem; border-radius: 4px;
+      transition: background var(--transition);
+    }
+    .menu-btn:hover { background: rgba(255,255,255,.2); }
+
+    /* POPUP MENU */
+    #menuPopup {
+      position: absolute; top: 3.5rem; right: 1rem;
+      background: var(--bg-panel); border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      opacity: 0; visibility: hidden;
+      transform: translateY(-10px);
+      transition: opacity var(--transition),
+                  transform var(--transition),
+                  visibility var(--transition);
+      z-index: 1000;
+    }
+    #menuPopup.open {
+      opacity: 1; visibility: visible; transform: translateY(0);
+    }
+    #menuPopup ul { list-style: none; }
+    #menuPopup li + li { border-top: 1px solid #EEE; }
+    #menuPopup a {
+      display: block; padding: .75rem 1.25rem;
+      color: var(--accent); font-weight: bold;
+      text-decoration: none;
+      transition: background var(--transition);
+    }
+    #menuPopup a:hover, #menuPopup a:focus {
+      background: var(--bg-toggle); outline: none;
+    }
+
+    /* WELCOME */
+    #welcome { padding: 1rem; }
+    .carousel { margin: 2rem auto; max-width: 800px; overflow: hidden; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.2); position: relative;}
+    .carousel img { width: 100%; display: none; transition: opacity .5s;}
+    .carousel img.active { display: block; }
+    .timeline { display: flex; overflow-x: auto; gap: 1rem; padding: 1rem; margin-bottom: 2rem; }
+    .timeline .item { flex: 0 0 auto; background: var(--bg-panel); padding: .75rem; border-radius: 6px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.1); min-width: 120px; }
+    .timeline .item strong { display: block; margin-bottom: .25rem; }
+
+    /* CHAPTER */
+    .chapter {
+      display: none;
+      max-width: 800px; margin: 2rem auto; padding: 1.5rem;
+      background: var(--bg-panel); border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,.1);
+      animation: fadeIn var(--transition);
+    }
+    .chapter.open { display: block; }
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+
+    .chapter h2 { margin-bottom: 1rem; font-size: 2rem; color: var(--accent); }
+    .chapter p { margin-bottom: 1rem; line-height: 1.6; }
+    .info-box { background: var(--bg-toggle); padding: .75rem 1rem; margin: 1rem 0; border-left: 4px solid var(--bg-cta); }
+    .chapter img { max-width: 100%; border-radius: 4px; margin-bottom: 1rem; cursor: pointer; transition: transform var(--transition);}
+    .chapter img:hover { transform: scale(1.02); }
+    .back-home {
+      display: inline-block; margin-top: 1rem; padding: .5rem 1rem;
+      background: var(--bg-toggle); border-radius:4px; font-weight:bold;
+      transition: background var(--transition), color var(--transition);
+    }
+    .back-home:hover { background: var(--bg-cta); color: var(--text-light); }
+
+    /* QUIZ */
+    .quiz { background:#F0E6D7; padding:1rem; border:1px solid #D3C4B8; border-radius:6px; margin:1.5rem 0;}
+    .quiz h3 { margin-bottom:.75rem; color:var(--accent); }
+    .quiz .question { margin-bottom:.75rem; }
+    .quiz label { display:block; cursor:pointer; margin-left:1rem; }
+    .quiz button { margin-top:.5rem; padding:.5rem 1rem; background:var(--bg-cta); color:var(--text-light); border:none; border-radius:4px; transition:background var(--transition); }
+    .quiz button:hover { background:var(--accent); }
+    .quiz-result { margin-top:.75rem; font-weight:bold; color:var(--accent); }
+
+    /* MODAL */
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); justify-content:center; align-items:center; z-index:2000;}
+    .modal img { max-width:90%; max-height:90%; border-radius:6px; }
+
+    /* CHART PLACEHOLDER */
+    .chart-container {
+      width:100%; height:300px; background:#f9f9f9; border:1px solid #ddd;
+      display:flex; align-items:center; justify-content:center; color:#aaa; font-style:italic; margin:1rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Sklaverei in Amerika</h1>
+    <p>Erforsche sechs Kapitel – von den Anfängen bis heute. Klicke “⋮” für die Kapitel-Auswahl.</p>
+    <button class="menu-btn" id="menuBtn" aria-label="Menü öffnen">⋮</button>
+    <nav id="menuPopup" aria-hidden="true">
+      <ul>
+        <li><a href="#" data-target="chap1">Kapitel 1 – Anfänge</a></li>
+        <li><a href="#" data-target="chap2">Kapitel 2 – Dreieckshandel</a></li>
+        <li><a href="#" data-target="chap3">Kapitel 3 – Alltag</a></li>
+        <li><a href="#" data-target="chap4">Kapitel 4 – Widerstand</a></li>
+        <li><a href="#" data-target="chap5">Kapitel 5 – Abschaffung</a></li>
+        <li><a href="#" data-target="chap6">Kapitel 6 – Folgen</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div id="welcome">
+    <div class="carousel">
+      <img src="bilder/slide1.jpg" alt="Symbol Dreieckshandel" class="active">
+      <img src="bilder/slide2.jpg" alt="Plantagenarbeit">
+      <img src="bilder/slide3.jpg" alt="Underground Railroad">
+    </div>
+    <div class="timeline">
+      <div class="item"><strong>1619</strong>Ankunft erste Afrikaner</div>
+      <div class="item"><strong>1700er</strong>Plantagen System</div>
+      <div class="item"><strong>1807</strong>UK verbietet Handel</div>
+      <div class="item"><strong>1863</strong>Emanzipations-Proklamation</div>
+      <div class="item"><strong>1865</strong>13. Zusatzartikel</div>
+      <div class="item"><strong>1964</strong>Civil Rights Act</div>
+      <div class="item"><strong>2020</strong>Black Lives Matter</div>
+    </div>
+  </div>
+
+  <!-- Kapitel 1 -->
+  <section class="chapter" id="chap1">
+    <h2>Kapitel 1: Anfänge</h2>
+    <p>1619 erreichten die ersten versklavten Afrikaner Virginia. Die Virginia Slave Codes von 1705 legten ihren Status auf lebenslanges Erbschaftssklaventum fest.</p>
+    <div class="info-box"><strong>Herkunft:</strong> West- und Zentralafrika (Kongo, Aschanti, Yoruba)</div>
+    <figure>
+      <img src="bilder/anfang.jpg" alt="Sklavenfestung Goldküste" onclick="openModal(this.src)">
+      <figcaption>Karte wichtiger Festungen an der Goldküste.</figcaption>
+    </figure>
+    <div class="chart-container">Diagramm „Todesrate Mittelpassage (%)“ (Platzhalter)</div>
+    <div class="quiz">
+      <h3>Quiz 1</h3>
+      <form data-answers='{"q1":"1619","q2":"Virginia Slave Codes"}'>
+        <div class="question">
+          <p>1. Wann landeten die ersten Afrikaner in Virginia?</p>
+          <label><input type="radio" name="q1" value="1619"> 1619</label>
+          <label><input type="radio" name="q1" value="1620"> 1620</label>
+        </div>
+        <div class="question">
+          <p>2. Welches Gesetz regelte ihren Status?</p>
+          <label><input type="radio" name="q2" value="Virginia Slave Codes"> Virginia Slave Codes</label>
+          <label><input type="radio" name="q2" value="Black Codes"> Black Codes</label>
+        </div>
+        <button type="button" class="submit-quiz">Prüfen</button>
+        <div class="quiz-result"></div>
+      </form>
+    </div>
+    <button class="back-home" data-target="welcome">← Übersicht</button>
+  </section>
+
+  <!-- Kapitel 2 -->
+  <section class="chapter" id="chap2">
+    <h2>Kapitel 2: Dreieckshandel</h2>
+    <p>Europe→Africa: Waren gegen Menschen. Africa→Amerika: Mittelpassage. Amerika→Europe: Zucker, Baumwolle, Tabak.</p>
+    <div class="info-box"><strong>Verschleppte:</strong> ca. 12 Mio. (1500–1850)</div>
+    <figure>
+      <img src="bilder/triangle.png" alt="Grafik Dreieckshandel" onclick="openModal(this.src)">
+      <figcaption>Transatlantisches Handelsschema.</figcaption>
+    </figure>
+    <div class="chart-container">Diagramm „Verschleppte pro Dekade“ (Platzhalter)</div>
+    <div class="quiz">
+      <h3>Quiz 2</h3>
+      <form data-answers='{"q1":"12 Mio.","q2":"Europa→Afrika→Amerika"}'>
+        <div class="question">
+          <p>1. Wie viele wurden verschleppt?</p>
+          <label><input type="radio" name="q1" value="8 Mio."> 8 Mio.</label>
+          <label><input type="radio" name="q1" value="12 Mio."> 12 Mio.</label>
+        </div>
+        <div class="question">
+          <p>2. Route des Dreieckshandels?</p>
+          <label><input type="radio" name="q2" value="Europa→Afrika→Amerika"> Europa→Afrika→Amerika</label>
+          <label><input type="radio" name="q2" value="Afrika→Amerika→Europa"> Afrika→Amerika→Europa</label>
+        </div>
+        <button type="button" class="submit-quiz">Prüfen</button>
+        <div class="quiz-result"></div>
+      </form>
+    </div>
+    <button class="back-home" data-target="welcome">← Übersicht</button>
+  </section>
+
+  <!-- Kapitel 3 -->
+  <section class="chapter" id="chap3">
+    <h2>Kapitel 3: Alltag</h2>
+    <p>Blockhütten mit 10–15 Personen, Maisbrei und Feldarbeit von Sonnenaufgang bis zum Einbruch der Dunkelheit.</p>
+    <div class="info-box"><strong>Ernährung:</strong> Maisbrei, selten Fleisch/Gemüse</div>
+    <figure>
+      <img src="bilder/alltag.jpg" alt="Blockhütten" onclick="openModal(this.src)">
+      <figcaption>Typische Unterkünfte auf Plantagen.</figcaption>
+    </figure>
+    <div class="chart-container">Diagramm „Altersverteilung 1800“ (Platzhalter)</div>
+    <div class="quiz">
+      <h3>Quiz 3</h3>
+      <form data-answers='{"q1":"10–15","q2":"Sonnenaufgang"}'>
+        <div class="question">
+          <p>1. Personen pro Hütte?</p>
+          <label><input type="radio" name="q1" value="5–8"> 5–8</label>
+          <label><input type="radio" name="q1" value="10–15"> 10–15</label>
+        </div>
+        <div class="question">
+          <p>2. Arbeitsbeginn?</p>
+          <label><input type="radio" name="q2" value="Sonnenaufgang"> Sonnenaufgang</label>
+          <label><input type="radio" name="q2" value="Mittag"> Mittag</label>
+        </div>
+        <button type="button" class="submit-quiz">Prüfen</button>
+        <div class="quiz-result"></div>
+      </form>
+    </div>
+    <button class="back-home" data-target="welcome">← Übersicht</button>
+  </section>
+
+  <!-- Kapitel 4 -->
+  <section class="chapter" id="chap4">
+    <h2>Kapitel 4: Widerstand</h2>
+    <p>Stono-Aufstand 1739, Underground Railroad, Harriet Tubman befreite 70+ Menschen.</p>
+    <div class="info-box"><strong>Figuren:</strong> Tubman, Douglass, Truth</div>
+    <figure>
+      <img src="bilder/widerstand.jpg" alt="Harriet Tubman" onclick="openModal(this.src)">
+      <figcaption>Harriet Tubman als Fluchthelferin.</figcaption>
+    </figure>
+    <div class="quiz">
+      <h3>Quiz 4</h3>
+      <form data-answers='{"q1":"1739","q2":"Harriet Tubman"}'>
+        <div class="question">
+          <p>1. Jahr des Stono-Aufstands?</p>
+          <label><input type="radio" name="q1" value="1739"> 1739</label>
+          <label><input type="radio" name="q1" value="1800"> 1800</label>
+        </div>
+        <div class="question">
+          <p>2. Wer führte Menschen zur Freiheit?</p>
+          <label><input type="radio" name="q2" value="Harriet Tubman"> Harriet Tubman</label>
+          <label><input type="radio" name="q2" value="Nat Turner"> Nat Turner</label>
+        </div>
+        <button type="button" class="submit-quiz">Prüfen</button>
+        <div class="quiz-result"></div>
+      </form>
+    </div>
+    <button class="back-home" data-target="welcome">← Übersicht</button>
+  </section>
+
+  <!-- Kapitel 5 -->
+  <section class="chapter" id="chap5">
+    <h2>Kapitel 5: Abschaffung</h2>
+    <p>Bürgerkrieg (1861–65), Emanzipations-Proklamation 1863, 13. Zusatzartikel 1865 – formelles Ende der Sklaverei.</p>
+    <div class="info-box"><strong>Debatte:</strong> Staatenrechte vs. Menschenrechte</div>
+    <figure>
+      <img src="bilder/abschaffung.jpg" alt="Lincoln" onclick="openModal(this.src)">
+      <figcaption>Lincoln unterschreibt die Proklamation.</figcaption>
+    </figure>
+    <div class="quiz">
+      <h3>Quiz 5</h3>
+      <form data-answers='{"q1":"1863","q2":"13"}'>
+        <div class="question">
+          <p>1. Wann die Proklamation?</p>
+          <label><input type="radio" name="q1" value="1863"> 1863</label>
+          <label><input type="radio" name="q1" value="1865"> 1865</label>
+        </div>
+        <div class="question">
+          <p>2. Zusatzartikel?</p>
+          <label><input type="radio" name="q2" value="13"> 13</label>
+          <label><input type="radio" name="q2" value="14"> 14</label>
+        </div>
+        <button type="button" class="submit-quiz">Prüfen</button>
+        <div class="quiz-result"></div>
+      </form>
+    </div>
+    <button class="back-home" data-target="welcome">← Übersicht</button>
+  </section>
+
+  <!-- Kapitel 6 -->
+  <section class="chapter" id="chap6">
+    <h2>Kapitel 6: Folgen</h2>
+    <p>Jim-Crow-Gesetze, Bürgerrechtsbewegung, Black Lives Matter – das Erbe beeinflusst bis heute Gesellschaft und Politik.</p>
+    <div class="info-box"><strong>Heute:</strong> Polizeigewalt, Racial Profiling, Reparationsdebatte</div>
+    <figure>
+      <img src="bilder/folgen.jpg" alt="BLM" onclick="openModal(this.src)">
+      <figcaption>BLM-Proteste 2020.</figcaption>
+    </figure>
+    <div class="quiz">
+      <h3>Quiz 6</h3>
+      <form data-answers='{"q1":"Jim-Crow","q2":"Black Lives Matter"}'>
+        <div class="question">
+          <p>1. Name der Segregationsgesetze?</p>
+          <label><input type="radio" name="q1" value="Jim-Crow"> Jim-Crow</label>
+          <label><input type="radio" name="q1" value="Black Codes"> Black Codes</label>
+        </div>
+        <div class="question">
+          <p>2. Aktuelle Bewegung?</p>
+          <label><input type="radio" name="q2" value="Black Lives Matter"> Black Lives Matter</label>
+          <label><input type="radio" name="q2" value="MeToo"> MeToo</label>
+        </div>
+        <button type="button" class="submit-quiz">Prüfen</button>
+        <div class="quiz-result"></div>
+      </form>
+    </div>
+    <button class="back-home" data-target="welcome">← Übersicht</button>
+  </section>
+
+  <!-- MODAL -->
+  <div class="modal" id="imgModal" onclick="this.style.display='none'" aria-hidden="true">
+    <img id="modalImg" src="" alt="Vergrößertes Bild">
+  </div>
+
+  <script>
+    // Menü-Toggle
+    const menuBtn   = document.getElementById('menuBtn');
+    const menuPopup = document.getElementById('menuPopup');
+    let menuOpen = false;
+    menuBtn.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      menuPopup.classList.toggle('open', menuOpen);
+      menuPopup.setAttribute('aria-hidden', !menuOpen);
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && menuOpen) {
+        menuOpen = false;
+        menuPopup.classList.remove('open');
+        menuPopup.setAttribute('aria-hidden', 'true');
+        menuBtn.focus();
+      }
+    });
+
+    // Kapitel-Navigation
+    const chapters = document.querySelectorAll('.chapter');
+    document.querySelectorAll('#menuPopup a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const tgt = link.getAttribute('data-target');
+        document.getElementById('welcome').style.display = 'none';
+        chapters.forEach(c => c.classList.remove('open'));
+        document.getElementById(tgt).classList.add('open');
+        menuOpen = false;
+        menuPopup.classList.remove('open');
+      });
+    });
+    document.querySelectorAll('.back-home').forEach(btn => {
+      btn.addEventListener('click', () => {
+        chapters.forEach(c => c.classList.remove('open'));
+        document.getElementById('welcome').style.display = 'block';
+      });
+    });
+
+    // Carousel
+    const slides = [...document.querySelectorAll('.carousel img')];
+    let idx = 0;
+    setInterval(() => {
+      slides[idx].classList.remove('active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('active');
+    }, 4000);
+
+    // Bild-Modal
+    function openModal(src) {
+      const modal = document.getElementById('imgModal');
+      document.getElementById('modalImg').src = src;
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    // Quiz-Handling
+    document.querySelectorAll('.submit-quiz').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const form = btn.closest('form');
+        const ans  = JSON.parse(form.dataset.answers);
+        let score = 0, total = Object.keys(ans).length;
+        Object.entries(ans).forEach(([q,a]) => {
+          const sel = form.querySelector(`input[name="${q}"]:checked`);
+          if (sel && sel.value === a) score++;
+        });
+        form.querySelector('.quiz-result').textContent = `Du hast ${score} von ${total} richtig beantwortet.`;
+      });
+    });
+  </script>
+
+</body>
+</html>
